@@ -13,18 +13,31 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const body = await req.json();
-        const { sessionId, serviceCode, phoneNumber, text } = body;
+        const contentType = req.headers.get('content-type');
+        if (contentType !== 'application/x-www-form-urlencoded') {
+            return new NextResponse(JSON.stringify({ message: 'Unsupported Media Type' }), {
+                status: 415,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        }
+
+        // Parse the URL-encoded request body
+        const formData = await req.formData();
+        const data: Record<string, string> = {};
+        formData.forEach((value, key) => {
+            data[key] = value.toString();
+        });
+
+        const { sessionId, serviceCode, phoneNumber, text } = data;
 
         let response = '';
 
         if (text === '') {
-            response = `CON What would you like to check
-1. My account
-2. My phone number`;
+            response = `CON What would you like to check\n1. My account\n2. My phone number`;
         } else if (text === '1') {
-            response = `CON Choose account information you want to view
-1. Account number`;
+            response = `CON Choose account information you want to view\n1. Account number`;
         } else if (text === '2') {
             response = `END Your phone number is ${phoneNumber}`;
         } else if (text === '1*1') {
@@ -39,7 +52,8 @@ export async function POST(req: NextRequest) {
             },
         });
     } catch (error) {
-        return new NextResponse(JSON.stringify({ message: 'Invalid JSON' }), {
+        console.error('Error parsing form data:', error);
+        return new NextResponse(JSON.stringify({ message: 'Invalid form data' }), {
             status: 400,
             headers: {
                 'Content-Type': 'application/json',
