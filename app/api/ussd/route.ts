@@ -70,9 +70,9 @@ export async function POST(req: NextRequest) {
                 // Here, you would typically save the data to a database, but since no database logic is included in your snippet, I'll skip it.
 
                 
-            }else if (level===9){
+            
                 response = `END Thank you for reporting. We will get back to you shortly.`;
-            }
+            
         } else {
             response = `END Invalid Choice.`;
         }
