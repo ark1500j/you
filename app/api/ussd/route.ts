@@ -33,24 +33,20 @@ export async function POST(req: NextRequest) {
         const { sessionId, serviceCode, phoneNumber, text } = data;
         const textArray = text.split('*');
         const level = textArray.length;
-    
+
         let response = '';
 
         if (text === '') {
-            response = `CON Hi welcome.Your mental health is a priority, don't be afraid to seek help\n1.Enter 1 to continue`;
+            response = `CON Hi welcome. Your mental health is a priority, don't be afraid to seek help\n1. Enter 1 to continue`;
         } else if (text === '1') {
             response = `CON Why are you here today?\n1. Emergency Support\n2. Report a case`;
         } else if (text === '1*1') {
-            response = `CON please call our emergency line\n1. Call now\n2. Main menu`;
+            response = `CON Please call our emergency line: 05555555555\n1. Call now\n2. Main menu`;
         } else if (text === '1*1*1') {
-            
             response = `END Please dial 05555555555 from your phone to receive immediate help`;
-        }
-        else if (text === '1*1*2') {
-            
+        } else if (text === '1*1*2') {
             response = `CON Why are you here today?\n1. Emergency Support\n2. Report a case`;
-        }
-        else if (text === '1*2') {
+        } else if (text === '1*2') {
             if (level === 2) {
                 response = `CON Enter name of victim:`;
             } else if (level === 3) {
@@ -63,8 +59,22 @@ export async function POST(req: NextRequest) {
                 response = `CON Enter victim's residence:`;
             } else if (level === 7) {
                 response = `CON Describe the case:`;
-            } else if (level === 8){}
+            } else if (level === 8) {
+                // Add your logic here for the final step, for example:
+                const name = textArray[2];
+                const victimPhoneNumber = textArray[3];
+                const college = textArray[4];
+                const department = textArray[5];
+                const residence = textArray[6];
+                const description = textArray[7];
 
+                // Here, you would typically save the data to a database, but since no database logic is included in your snippet, I'll skip it.
+
+                response = `END Thank you for reporting. We will get back to you shortly.`;
+            }
+        } else {
+            response = `END Invalid Choice.`;
+        }
 
         return new NextResponse(response, {
             status: 200,
@@ -72,7 +82,7 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'text/plain',
             },
         });
-    }} catch (error) {
+    } catch (error) {
         console.error('Error parsing form data:', error);
         return new NextResponse(JSON.stringify({ message: 'Invalid form data' }), {
             status: 400,
