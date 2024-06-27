@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
             response = `END Please dial 05555555555 from your phone to receive immediate help`;
         } else if (text === '1*1*2') {
             response = `CON Why are you here today?\n1. Emergency Support\n2. Report a case`;
-        } else if (text === '1*2') {
+        } else if (text.startsWith('1*2')) {
             if (level === 2) {
                 response = `CON Enter name of victim:`;
             } else if (level === 3) {
@@ -60,13 +60,12 @@ export async function POST(req: NextRequest) {
             } else if (level === 7) {
                 response = `CON Describe the case:`;
             } else if (level === 8) {
-                // Add your logic here for the final step, for example:
-                const name = textArray[2];
-                const victimPhoneNumber = textArray[3];
-                const college = textArray[4];
-                const department = textArray[5];
-                const residence = textArray[6];
-                const description = textArray[7];
+                const name = textArray[1];
+                const victimPhoneNumber = textArray[2];
+                const college = textArray[3];
+                const department = textArray[4];
+                const residence = textArray[5];
+                const description = textArray[6];
 
                 // Here, you would typically save the data to a database, but since no database logic is included in your snippet, I'll skip it.
 
