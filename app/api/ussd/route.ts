@@ -31,19 +31,40 @@ export async function POST(req: NextRequest) {
         });
 
         const { sessionId, serviceCode, phoneNumber, text } = data;
-
+        const textArray = text.split('*');
+        const level = textArray.length;
+    
         let response = '';
 
         if (text === '') {
-            response = `CON What would you like to check\n1. My account\n2. My phone number`;
+            response = `CON Hi welcome.Your mental health is a priority, don't be afraid to seek help\n1.Enter 1 to continue`;
         } else if (text === '1') {
-            response = `CON Choose account information you want to view\n1. Account number`;
-        } else if (text === '2') {
-            response = `END Your phone number is ${phoneNumber}`;
+            response = `CON Why are you here today?\n1. Emergency Support\n2. Report a case`;
         } else if (text === '1*1') {
-            const accountNumber = 'ACC100101';
-            response = `END Your account number is ${accountNumber}`;
+            response = `CON please call our emergency line\n1. Call now\n2. Main menu`;
+        } else if (text === '1*1*1') {
+            
+            response = `END Please dial 05555555555 from your phone to receive immediate help`;
         }
+        else if (text === '1*1*2') {
+            
+            response = `CON Why are you here today?\n1. Emergency Support\n2. Report a case`;
+        }
+        else if (text === '1*2') {
+            if (level === 2) {
+                response = `CON Enter name of victim:`;
+            } else if (level === 3) {
+                response = `CON Enter victim's phone number:`;
+            } else if (level === 4) {
+                response = `CON Enter victim's college:`;
+            } else if (level === 5) {
+                response = `CON Enter victim's department:`;
+            } else if (level === 6) {
+                response = `CON Enter victim's residence:`;
+            } else if (level === 7) {
+                response = `CON Describe the case:`;
+            } else if (level === 8){}
+
 
         return new NextResponse(response, {
             status: 200,
@@ -51,7 +72,7 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'text/plain',
             },
         });
-    } catch (error) {
+    }} catch (error) {
         console.error('Error parsing form data:', error);
         return new NextResponse(JSON.stringify({ message: 'Invalid form data' }), {
             status: 400,
