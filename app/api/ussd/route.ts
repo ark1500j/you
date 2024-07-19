@@ -1,95 +1,127 @@
-// pages/api/ussd.ts
-
-import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from "@/utils/dbclient";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-    if (req.method !== 'POST') {
-        return new NextResponse(JSON.stringify({ message: 'Method Not Allowed' }), {
-            status: 405,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+  if (req.method !== "POST") {
+    return new NextResponse(JSON.stringify({ message: "Method Not Allowed" }), {
+      status: 405,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  try {
+    const contentType = req.headers.get("content-type");
+    if (contentType !== "application/x-www-form-urlencoded") {
+      return new NextResponse(
+        JSON.stringify({ message: "Unsupported Media Type" }),
+        {
+          status: 415,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
-    try {
-        const contentType = req.headers.get('content-type');
-        if (contentType !== 'application/x-www-form-urlencoded') {
-            return new NextResponse(JSON.stringify({ message: 'Unsupported Media Type' }), {
-                status: 415,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-        }
+    // Parse the URL-encoded request body
+    const formData = await req.formData();
+    const data: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      data[key] = value.toString();
+    });
 
-        // Parse the URL-encoded request body
-        const formData = await req.formData();
-        const data: Record<string, string> = {};
-        formData.forEach((value, key) => {
-            data[key] = value.toString();
+    const { sessionId, serviceCode, phoneNumber, text } = data;
+    const textArray = text.split("*");
+    const level = textArray.length;
+
+    let response = "";
+
+    const colleges = [
+      "Engineering",
+      "Science",
+      "Social Science",
+      "Arts and Builds",
+      "Health Sciences",
+      "Agriculture and Natural Resources",
+    ];
+
+    const residences = ["On-Campus", "Ayeduase", "Kotei", "Other"];
+
+    const descriptions = [
+      "Depression",
+      "Suicidal Thoughts",
+      "Schizophrenia",
+      "Psychosis",
+      "Other",
+    ];
+
+    if (text === "") {
+      response = `CON Hi welcome. Your mental health is a priority, don't be afraid to seek help\n1. Enter 1 to continue`;
+    } else if (text === "1") {
+      response = `CON Why are you here today?\n1. Report a case\n2. Suicide Prevention\n3. Telephone Counselling`;
+    } else if (text === "1*2") {
+      response = `END Please dial +233 24 812 0587 for Suicide Prevention.`;
+    } else if (text === "1*3") {
+      response = `END Please dial 0322022323 for Telephone Counselling.`;
+    } else if (text.startsWith("1*1")) {
+      if (level === 2) {
+        response = `CON Enter name of victim:`;
+      } else if (level === 3) {
+        response = `CON Enter victim's phone number:`;
+      } else if (level === 4) {
+        response = `CON Choose victim's college:\n${colleges
+          .map((c, i) => `${i + 1}. ${c}`)
+          .join("\n")}`;
+      } else if (level === 5) {
+        response = `CON Choose victim's residence:\n${residences
+          .map((r, i) => `${i + 1}. ${r}`)
+          .join("\n")}`;
+      } else if (level === 6) {
+        response = `CON Choose the issue:\n${descriptions
+          .map((d, i) => `${i + 1}. ${d}`)
+          .join("\n")}`;
+      } else if (level === 7) {
+        const name = textArray[1] as string;
+        const phone = textArray[2] as string;
+        const collegeIndex = parseInt(textArray[3]) - 1;
+        const selectedCollege = colleges[collegeIndex];
+        const residenceIndex = parseInt(textArray[4]) - 1;
+        const selectedResidence = residences[residenceIndex];
+        const descriptionIndex = parseInt(textArray[5]) - 1;
+        const selectedDescription = descriptions[descriptionIndex];
+
+        response = `END Thank you for reporting.`;
+        const user = await prisma.patient.create({
+          data: {
+            college: selectedCollege,
+            residence: selectedResidence,
+            description: selectedDescription,
+            phone,
+            name,
+            counceler:{connect:{college:selectedCollege}}
+          },
         });
-
-        const { sessionId, serviceCode, phoneNumber, text } = data;
-        const textArray = text.split('*');
-        const level = textArray.length;
-
-        let response = '';
-
-        if (text === '') {
-            response = `CON Hi welcome. Your mental health is a priority, don't be afraid to seek help\n1. Enter 1 to continue`;
-        } else if (text === '1') {
-            response = `CON Why are you here today?\n1. Emergency Support\n2. Report a case`;
-        } else if (text === '1*1') {
-            response = `CON Please call our emergency line: 05555555555\n1. Call now\n2. Main menu`;
-        } else if (text === '1*1*1') {
-            response = `END Please dial 05555555555 from your phone to receive immediate help`;
-        } else if (text === '1*1*2') {
-            response = `CON Why are you here today?\n1. Emergency Support\n2. Report a case`;
-        } else if (text.startsWith('1*2')) {
-            if (level === 2) {
-                response = `CON Enter name of victim:`;
-            } else if (level === 3) {
-                response = `CON Enter victim's phone number:`;
-            } else if (level === 4) {
-                response = `CON Enter victim's college:`;
-            } else if (level === 5) {
-                response = `CON Enter victim's department:`;
-            } else if (level === 6) {
-                response = `CON Enter victim's residence:`;
-            } else if (level === 7) {
-                response = `CON Describe the case:`;
-            } else if (level === 8) {
-                const name = textArray[1];
-                const victimPhoneNumber = textArray[2];
-                const college = textArray[3];
-                const department = textArray[4];
-                const residence = textArray[5];
-                const description = textArray[6];
-
-                // Here, you would typically save the data to a database, but since no database logic is included in your snippet, I'll skip it.
-
-                
-            
-                response = `END Thank you for reporting. We will get back to you shortly.`;
-            }
-        } else {
-            response = `END Invalid Choice.`;
-        }
-
-        return new NextResponse(response, {
-            status: 200,
-            headers: {
-                'Content-Type': 'text/plain',
-            },
-        });
-    } catch (error) {
-        console.error('Error parsing form data:', error);
-        return new NextResponse(JSON.stringify({ message: 'Invalid form data' }), {
-            status: 400,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        console.log(user)
+      }
+    } else {
+      response = `END Invalid Choice.`;
     }
+
+    return new NextResponse(response, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    });
+  } catch (error) {
+    console.error("Error parsing form data:", error);
+    return new NextResponse(JSON.stringify({ message: "Invalid form data" }), {
+      status: 400,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
 }

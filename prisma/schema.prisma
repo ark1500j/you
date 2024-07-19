@@ -12,23 +12,23 @@ datasource db {
 
 
 model Councelors{
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   name String
   email String @unique
   phone String
-  college String
+  college String @unique
   students Patient[]
   
 }
 model Patient{
-  id Int  @unique
+  id Int  @id @default(autoincrement())
   name String
   phone String
-  refNumber String
+  refNumber String?
   description String
   residence String
   college String
-  deparment String
+  department String?
   counceler Councelors @relation(fields: [councelor], references: [email])
   councelor String
 }

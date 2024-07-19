@@ -1,9 +1,7 @@
 import {prisma} from "@/utils/dbclient"
-import { headers } from "next/headers";
 
 export async function GET(req: Request) {
 
-     const header = headers().get("Authorisation")
     try {
 
       const { email } = await req.json();
