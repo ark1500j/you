@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
         console.log(parseInt(textArray[3]) - 1)
         console.log(textArray[3])
          console.log(selectedCollege)
+         console.log(textArray)
         const user = await prisma.patient.create({
           data: {
             college: selectedCollege,
