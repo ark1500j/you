@@ -1,6 +1,7 @@
 import {prisma} from "@/utils/dbclient"
 
-export async function GET(req: Request) {
+export async function POST(req:Request) {
+  console.log("api working")
 
     try {
 
@@ -27,6 +28,7 @@ export async function GET(req: Request) {
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (error) {
+      console.log(error)
       return new Response(
         JSON.stringify({ error: "Internal server error" }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }

@@ -91,8 +91,7 @@ export async function POST(req: NextRequest) {
         const selectedResidence = residences[residenceIndex];
         const descriptionIndex = parseInt(textArray[5]) - 1;
         const selectedDescription = descriptions[descriptionIndex];
-
-        response = `END Thank you for reporting.`;
+         
         const user = await prisma.patient.create({
           data: {
             college: selectedCollege,
@@ -104,6 +103,9 @@ export async function POST(req: NextRequest) {
           },
         });
         console.log(user)
+        
+        response = `END Thank you for reporting.`;
+
       }
     } else {
       response = `END Invalid Choice.`;
