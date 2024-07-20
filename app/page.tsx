@@ -3,18 +3,18 @@ import Image from "next/image";
 import useSWR from "swr";
 
 export default  function Home() {
-  //  const {data }= useSWR("/api/abena", async (url)=>{
-  //   const res = await fetch(url, {
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       // Add other headers if needed
-  //     },
-  //     method:"POST",
-  //     body:JSON.stringify({"email": "arkwashington52@gmail.com"})})
-  //    const data =await res.json();
-  //    console.log(data)
-  //    return data
-  //  })
+   const {data }= useSWR("/api/abena", async (url)=>{
+    const res = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        // Add other headers if needed
+      },
+      method:"POST",
+      body:JSON.stringify({"email": "arkwashington52@gmail.com"})})
+     const data =await res.json();
+     console.log(data)
+     return data
+   })
   
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
