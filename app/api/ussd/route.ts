@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         const selectedResidence = residences[residenceIndex];
         const descriptionIndex = parseInt(textArray[5]) - 1;
         const selectedDescription = descriptions[descriptionIndex];
-         
+         console.log(selectedCollege)
         const user = await prisma.patient.create({
           data: {
             college: selectedCollege,

@@ -2,7 +2,7 @@ import {prisma} from "@/utils/dbclient"
 
 export async function POST(req:Request) {
   console.log("api working")
-  console.log(process.env.DATABASE_URL)
+
     try {
 
       const { email } = await req.json();
