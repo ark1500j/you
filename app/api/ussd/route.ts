@@ -83,13 +83,13 @@ export async function POST(req: NextRequest) {
           .map((d, i) => `${i + 1}. ${d}`)
           .join("\n")}`;
       } else if (level === 7) {
+        const phone = textArray[0] as string;
         const name = textArray[1] as string;
-        const phone = textArray[2] as string;
-        const collegeIndex = parseInt(textArray[3]) - 1;
+        const collegeIndex = parseInt(textArray[2]) - 1;
         const selectedCollege = colleges[collegeIndex];
-        const residenceIndex = parseInt(textArray[4]) - 1;
+        const residenceIndex = parseInt(textArray[3]) - 1;
         const selectedResidence = residences[residenceIndex];
-        const descriptionIndex = parseInt(textArray[5]) - 1;
+        const descriptionIndex = parseInt(textArray[4]) - 1;
         const selectedDescription = descriptions[descriptionIndex];
         console.log(parseInt(textArray[3]) - 1)
         console.log(textArray[3])
