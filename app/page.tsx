@@ -1,21 +1,25 @@
-"use client"
+"use client";
 import Image from "next/image";
 import useSWR from "swr";
 
-export default  function Home() {
-   const {data }= useSWR("/api/abena", async (url)=>{
+export default function Home() {
+  const formdata = {
+    email: "arkwashington52@gmail.com",
+  };
+  const { data } = useSWR("/api/abena", async (url) => {
     const res = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         // Add other headers if needed
       },
-      method:"POST",
-      body:JSON.stringify({"email": "arkwashington52@gmail.com"})})
-     const data =await res.json();
-     console.log(data)
-     return data
-   })
-  
+      method: "POST",
+      body: JSON.stringify(formdata),
+    });
+    const data = await res.json();
+    console.log(data);
+    return data;
+  });
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
@@ -124,6 +128,5 @@ export default  function Home() {
         </a>
       </div>
     </main>
-  )
+  );
 }
-
