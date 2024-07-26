@@ -1,15 +1,33 @@
 import { prisma } from "@/utils/dbclient";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  console.log("api working");
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://www.google.com",
+  "https://your-production-site.com",
+];
+
+export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
+  console.log(origin);
+
+  // Check if the origin is allowed
+  if (origin && !allowedOrigins.includes(origin)) {
+    return new NextResponse("Origin not allowed", {
+      status: 403,
+      headers: {
+        "Access-Control-Allow-Origin": origin || "*",
+      },
+    });
+  }
+
   try {
     const { email } = await req.json();
+    console.log(email);
 
     if (!email) {
       return new NextResponse(
-        JSON.stringify({ error: "Invalid request: 'id' is required" }),
+        JSON.stringify({ error: "Invalid request: 'email' is required" }),
         {
           status: 400,
           headers: {
@@ -34,7 +52,7 @@ export async function POST(req: Request) {
         },
       });
     }
-    console.log(counselor)
+    console.log(counselor);
     return new NextResponse(JSON.stringify(counselor), {
       status: 200,
       headers: {
@@ -46,10 +64,30 @@ export async function POST(req: Request) {
     console.log(error);
     return new NextResponse(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      statusText:"not working",
       headers: {
         "Access-Control-Allow-Origin": origin || "*",
         "Content-Type": "application/json",
+      },
+    });
+  }
+}
+
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get("origin");
+  if (origin && allowedOrigins.includes(origin)) {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization",
+      },
+    });
+  } else {
+    return new NextResponse(null, {
+      status: 403,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
       },
     });
   }

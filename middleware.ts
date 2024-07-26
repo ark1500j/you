@@ -14,10 +14,10 @@ export function middleware(request:Request){
             'Content-Type':'text/plain' 
         } 
     }) 
-    console.log(origin) 
-    console.log("Middleware") 
-    console.log(request.method) 
-    console.log(request.url) 
+    // console.log(origin) 
+    // console.log("Middleware") 
+    // console.log(request.method) 
+    // console.log(request.url) 
     
  
     return  NextResponse.next(); 
