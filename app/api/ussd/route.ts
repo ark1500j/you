@@ -1,11 +1,19 @@
 import { prisma } from "@/utils/dbclient";
 import { NextRequest, NextResponse } from "next/server";
-import { parse } from 'querystring';
 
 export async function POST(req: NextRequest) {
+  if (req.method !== "POST") {
+    return new NextResponse(JSON.stringify({ message: "Method Not Allowed" }), {
+      status: 405,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
   try {
     const contentType = req.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/x-www-form-urlencoded")) {
+    if (contentType !== "application/x-www-form-urlencoded") {
       return new NextResponse(
         JSON.stringify({ message: "Unsupported Media Type" }),
         {
@@ -18,11 +26,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Parse the URL-encoded request body
-    const requestBody = await req.text();
-    const data = parse(requestBody);
+    const formData = await req.formData();
+    const data: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      data[key] = value.toString();
+    });
 
     const { sessionId, serviceCode, phoneNumber, text } = data;
-    const textArray = (text as string).split("*");
+    const textArray = text.split("*");
     const level = textArray.length;
 
     let response = "";
@@ -55,7 +66,7 @@ export async function POST(req: NextRequest) {
       "Other",
     ];
 
-    if (!text) {
+    if (text === "") {
       response = `CON Hi welcome. Your mental health is a priority, don't be afraid to seek help\n1. Enter 1 to continue`;
     } else if (text === "1") {
       response = `CON Why are you here today?\n1. Report a case\n2. Suicide Prevention\n3. Telephone Counselling`;
@@ -74,23 +85,38 @@ export async function POST(req: NextRequest) {
           .join("\n")}`;
       } else if (level === 5) {
         const collegeIndex = parseInt(textArray[4]) - 1;
-        const selectedCollege = colleges[collegeIndex];
-        const selectedDepartments = departments[selectedCollege];
+        if (collegeIndex < 0 || collegeIndex >= colleges.length) {
+          response = `END Invalid college selection.`;
+        } else {
+          const selectedCollege = colleges[collegeIndex];
+          const selectedDepartments = departments[selectedCollege];
 
-        response = `CON Choose victim's department:\n${selectedDepartments
-          .map((d, i) => `${i + 1}. ${d}`)
-          .join("\n")}`;
+          response = `CON Choose victim's department:\n${selectedDepartments
+            .map((d, i) => `${i + 1}. ${d}`)
+            .join("\n")}`;
+        }
       } else if (level === 6) {
-        response = `CON Choose victim's residence:\n${residences
-          .map((r, i) => `${i + 1}. ${r}`)
-          .join("\n")}`;
+        const collegeIndex = parseInt(textArray[4]) - 1;
+        const selectedCollege = colleges[collegeIndex];
+        const departmentIndex = parseInt(textArray[5]) - 1;
+
+        if (
+          departmentIndex < 0 ||
+          departmentIndex >= departments[selectedCollege].length
+        ) {
+          response = `END Invalid department selection.`;
+        } else {
+          response = `CON Choose victim's residence:\n${residences
+            .map((r, i) => `${i + 1}. ${r}`)
+            .join("\n")}`;
+        }
       } else if (level === 7) {
         response = `CON Choose the issue:\n${descriptions
           .map((d, i) => `${i + 1}. ${d}`)
           .join("\n")}`;
       } else if (level === 8) {
-        const phone = textArray[3] as string;
         const name = textArray[2] as string;
+        const phone = textArray[3] as string;
         const collegeIndex = parseInt(textArray[4]) - 1;
         const selectedCollege = colleges[collegeIndex];
         const departmentIndex = parseInt(textArray[5]) - 1;
@@ -99,6 +125,8 @@ export async function POST(req: NextRequest) {
         const selectedResidence = residences[residenceIndex];
         const descriptionIndex = parseInt(textArray[7]) - 1;
         const selectedDescription = descriptions[descriptionIndex];
+
+        console.log(textArray);
 
         const user = await prisma.patient.create({
           data: {
@@ -111,6 +139,7 @@ export async function POST(req: NextRequest) {
             counceler: { connect: { college: selectedCollege } },
           },
         });
+        console.log(user);
 
         response = `END Thank you for reporting.`;
       }
@@ -125,7 +154,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error processing request:", error);
+    console.error("Error parsing form data:", error);
     return new NextResponse(JSON.stringify({ message: "Invalid form data" }), {
       status: 400,
       headers: {
