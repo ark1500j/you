@@ -1,20 +1,11 @@
 import { prisma } from "@/utils/dbclient";
 import { NextRequest, NextResponse } from "next/server";
-import { URLSearchParams } from "url";
+import { parse } from 'querystring';
 
 export async function POST(req: NextRequest) {
-  if (req.method !== "POST") {
-    return new NextResponse(JSON.stringify({ message: "Method Not Allowed" }), {
-      status: 405,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
-
   try {
     const contentType = req.headers.get("content-type");
-    if (contentType !== "application/x-www-form-urlencoded") {
+    if (!contentType || !contentType.includes("application/x-www-form-urlencoded")) {
       return new NextResponse(
         JSON.stringify({ message: "Unsupported Media Type" }),
         {
@@ -27,15 +18,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Parse the URL-encoded request body
-    const formDataText = await req.text();
-    const formData = new URLSearchParams(formDataText);
-    const data: Record<string, string> = {};
-    formData.forEach((value, key) => {
-      data[key] = value;
-    });
+    const requestBody = await req.text();
+    const data = parse(requestBody);
 
     const { sessionId, serviceCode, phoneNumber, text } = data;
-    const textArray = text.split("*");
+    const textArray = (text as string).split("*");
     const level = textArray.length;
 
     let response = "";
@@ -53,9 +40,9 @@ export async function POST(req: NextRequest) {
       Engineering: ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Computer Engineering"],
       Science: ["Mathematics", "Physics", "Chemistry", "Biology"],
       Social Science: ["Sociology", "Psychology", "Political Science", "Geography"],
-      Arts and Builds: ["Architecture", "Fine Arts", "Building Technology", "Communication Design"],
-      Health Sciences: ["Nursing", "Medicine", "Pharmacy", "Dentistry"],
-      Agriculture and Natural Resources: ["Crop Science", "Animal Science", "Agricultural Economics", "Forest Resources"],
+      "Arts and Builds": ["Architecture", "Fine Arts", "Building Technology", "Communication Design"],
+      "Health Sciences": ["Nursing", "Medicine", "Pharmacy", "Dentistry"],
+      "Agriculture and Natural Resources": ["Crop Science", "Animal Science", "Agricultural Economics", "Forest Resources"],
     };
 
     const residences = ["On-Campus", "Ayeduase", "Kotei", "Other"];
@@ -68,7 +55,7 @@ export async function POST(req: NextRequest) {
       "Other",
     ];
 
-    if (text === "") {
+    if (!text) {
       response = `CON Hi welcome. Your mental health is a priority, don't be afraid to seek help\n1. Enter 1 to continue`;
     } else if (text === "1") {
       response = `CON Why are you here today?\n1. Report a case\n2. Suicide Prevention\n3. Telephone Counselling`;
@@ -112,9 +99,7 @@ export async function POST(req: NextRequest) {
         const selectedResidence = residences[residenceIndex];
         const descriptionIndex = parseInt(textArray[7]) - 1;
         const selectedDescription = descriptions[descriptionIndex];
-        
-        console.log(textArray);
-        
+
         const user = await prisma.patient.create({
           data: {
             college: selectedCollege,
@@ -126,10 +111,8 @@ export async function POST(req: NextRequest) {
             counceler: { connect: { college: selectedCollege } },
           },
         });
-        console.log(user);
-        
-        response = `END Thank you for reporting.`;
 
+        response = `END Thank you for reporting.`;
       }
     } else {
       response = `END Invalid Choice.`;
@@ -142,7 +125,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error parsing form data:", error);
+    console.error("Error processing request:", error);
     return new NextResponse(JSON.stringify({ message: "Invalid form data" }), {
       status: 400,
       headers: {
