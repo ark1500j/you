@@ -1,5 +1,6 @@
 import { prisma } from "@/utils/dbclient";
 import { NextRequest, NextResponse } from "next/server";
+import { URLSearchParams } from "url";
 
 export async function POST(req: NextRequest) {
   if (req.method !== "POST") {
@@ -26,10 +27,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Parse the URL-encoded request body
-    const formData = await req.formData();
+    const formDataText = await req.text();
+    const formData = new URLSearchParams(formDataText);
     const data: Record<string, string> = {};
     formData.forEach((value, key) => {
-      data[key] = value.toString();
+      data[key] = value;
     });
 
     const { sessionId, serviceCode, phoneNumber, text } = data;
