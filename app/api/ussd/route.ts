@@ -47,15 +47,6 @@ export async function POST(req: NextRequest) {
       "Agriculture and Natural Resources",
     ];
 
-    const departments: Record<string, string[]> = {
-      Engineering: ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Computer Engineering"],
-      Science: ["Mathematics", "Physics", "Chemistry", "Biology"],
-      Social Science: ["Sociology", "Psychology", "Political Science", "Geography"],
-      "Arts and Builds": ["Architecture", "Fine Arts", "Building Technology", "Communication Design"],
-      "Health Sciences": ["Nursing", "Medicine", "Pharmacy", "Dentistry"],
-      "Agriculture and Natural Resources": ["Crop Science", "Animal Science", "Agricultural Economics", "Forest Resources"],
-    };
-
     const residences = ["On-Campus", "Ayeduase", "Kotei", "Other"];
 
     const descriptions = [
@@ -84,54 +75,32 @@ export async function POST(req: NextRequest) {
           .map((c, i) => `${i + 1}. ${c}`)
           .join("\n")}`;
       } else if (level === 5) {
-        const collegeIndex = parseInt(textArray[4]) - 1;
-        if (collegeIndex < 0 || collegeIndex >= colleges.length) {
-          response = `END Invalid college selection.`;
-        } else {
-          const selectedCollege = colleges[collegeIndex];
-          const selectedDepartments = departments[selectedCollege];
-
-          response = `CON Choose victim's department:\n${selectedDepartments
-            .map((d, i) => `${i + 1}. ${d}`)
-            .join("\n")}`;
-        }
+        response = `CON Enter victim's department:`;
       } else if (level === 6) {
-        const collegeIndex = parseInt(textArray[4]) - 1;
-        const selectedCollege = colleges[collegeIndex];
-        const departmentIndex = parseInt(textArray[5]) - 1;
-
-        if (
-          departmentIndex < 0 ||
-          departmentIndex >= departments[selectedCollege].length
-        ) {
-          response = `END Invalid department selection.`;
-        } else {
-          response = `CON Choose victim's residence:\n${residences
-            .map((r, i) => `${i + 1}. ${r}`)
-            .join("\n")}`;
-        }
+        response = `CON Choose victim's residence:\n${residences
+          .map((r, i) => `${i + 1}. ${r}`)
+          .join("\n")}`;
       } else if (level === 7) {
         response = `CON Choose the issue:\n${descriptions
           .map((d, i) => `${i + 1}. ${d}`)
           .join("\n")}`;
       } else if (level === 8) {
-        const name = textArray[2] as string;
         const phone = textArray[3] as string;
+        const name = textArray[2] as string;
         const collegeIndex = parseInt(textArray[4]) - 1;
         const selectedCollege = colleges[collegeIndex];
-        const departmentIndex = parseInt(textArray[5]) - 1;
-        const selectedDepartment = departments[selectedCollege][departmentIndex];
+        const department = textArray[5] as string;
         const residenceIndex = parseInt(textArray[6]) - 1;
         const selectedResidence = residences[residenceIndex];
         const descriptionIndex = parseInt(textArray[7]) - 1;
         const selectedDescription = descriptions[descriptionIndex];
-
+        
         console.log(textArray);
-
+        
         const user = await prisma.patient.create({
           data: {
             college: selectedCollege,
-            department: selectedDepartment,
+            department: department,
             residence: selectedResidence,
             description: selectedDescription,
             phone,
@@ -140,7 +109,7 @@ export async function POST(req: NextRequest) {
           },
         });
         console.log(user);
-
+        
         response = `END Thank you for reporting.`;
       }
     } else {
