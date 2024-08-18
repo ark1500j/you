@@ -4,7 +4,7 @@ import useSWR from "swr";
 
 export default function Home() {
   const formdata = {
-    email: "arkwashington52@gmail.com",
+    email: "wquarshie@knust.edu.gh",
   };
   const { data } = useSWR("/api/abena", async (url) => {
     const res = await fetch(url, {
