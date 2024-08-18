@@ -15,25 +15,17 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
   console.log(origin);
   
-    if (!validateApiKey(req)) {
-      return new NextResponse(JSON.stringify({ error: "Invalid API key" }), {
-        status: 401,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-        },
-      });
-    }
+    // if (!validateApiKey(req)) {
+    //   return new NextResponse(JSON.stringify({ error: "Invalid API key" }), {
+    //     status: 401,
+    //     headers: {
+    //       "Access-Control-Allow-Origin": "*",
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
+    // }
 
   // Check if the origin is allowed
-  if (origin && !allowedOrigins.includes(origin)) {
-    return new NextResponse("Origin not allowed", {
-      status: 403,
-      headers: {
-        "Access-Control-Allow-Origin": origin || "*",
-      },
-    });
-  }
 
   try {
     const { email } = await req.json();
