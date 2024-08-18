@@ -26,6 +26,7 @@ model Patient{
   name String
   phone String
   refNumber String?
+  isRead Boolean @default(false)
   description String
   residence String
   college String

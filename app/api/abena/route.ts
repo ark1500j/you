@@ -6,10 +6,24 @@ const allowedOrigins = [
   "https://www.google.com",
   "https://your-production-site.com",
 ];
+function validateApiKey(req: NextRequest): boolean {
+  const apikey = req.headers.get("API-KEY");
+  return apikey === process.env.API_KEY;
+}
 
 export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
   console.log(origin);
+  
+    if (!validateApiKey(req)) {
+      return new NextResponse(JSON.stringify({ error: "Invalid API key" }), {
+        status: 401,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+      });
+    }
 
   // Check if the origin is allowed
   if (origin && !allowedOrigins.includes(origin)) {
