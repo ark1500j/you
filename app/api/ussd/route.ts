@@ -75,38 +75,42 @@ export async function POST(req: NextRequest) {
           .map((c, i) => `${i + 1}. ${c}`)
           .join("\n")}`;
       } else if (level === 5) {
+        response = `CON Enter victim's department:`;
+      } else if (level === 6) {
         response = `CON Choose victim's residence:\n${residences
           .map((r, i) => `${i + 1}. ${r}`)
           .join("\n")}`;
-      } else if (level === 6) {
+      } else if (level === 7) {
         response = `CON Choose the issue:\n${descriptions
           .map((d, i) => `${i + 1}. ${d}`)
           .join("\n")}`;
-      } else if (level === 7) {
+      } else if (level === 8) {
         const phone = textArray[3] as string;
         const name = textArray[2] as string;
         const collegeIndex = parseInt(textArray[4]) - 1;
         const selectedCollege = colleges[collegeIndex];
-        const residenceIndex = parseInt(textArray[5]) - 1;
+        const department = textArray[5] as string;
+        const residenceIndex = parseInt(textArray[6]) - 1;
         const selectedResidence = residences[residenceIndex];
-        const descriptionIndex = parseInt(textArray[6]) - 1;
+        const descriptionIndex = parseInt(textArray[7]) - 1;
         const selectedDescription = descriptions[descriptionIndex];
-        console.log(textArray)
-     
+        
+        console.log(textArray);
+        
         const user = await prisma.patient.create({
           data: {
             college: selectedCollege,
+            department: department,
             residence: selectedResidence,
             description: selectedDescription,
             phone,
             name,
-            counceler:{connect:{college:selectedCollege}}
+            counceler: { connect: { college: selectedCollege } },
           },
         });
-        console.log(user)
+        console.log(user);
         
         response = `END Thank you for reporting.`;
-
       }
     } else {
       response = `END Invalid Choice.`;
