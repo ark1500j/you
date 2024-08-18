@@ -10,6 +10,7 @@ export default function Home() {
     const res = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
+        "API-KEY":"quinn"
         // Add other headers if needed
       },
       method: "POST",
